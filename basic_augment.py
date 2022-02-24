@@ -21,13 +21,7 @@ class BasicAugment():
         self.translate_percent = translate_percent
         self.brightness = brightness
 
-        if self.show_sample:
-            random_index = random.randint(0, len(self.image_paths)-1)
-            
-            original_image = mpimg.imread(self.image_paths[random_index])
-            augmented_image = self.random_augment(self.image_paths[random_index])
-            
-            self.show_sample_image(original_image, augmented_image)
+        self.show_sample_image()
         
     def batch_generator(self, batch_size, istraining):
         while True:
@@ -49,7 +43,7 @@ class BasicAugment():
                 batch_label.append(label)
             yield (np.asarray(batch_img), np.asarray(batch_label))
     
-    def generator(self, size):
+    def generate(self, size):
         new_img = []
         new_label = []
         for _ in range(size):
@@ -76,7 +70,7 @@ class BasicAugment():
     def random_augment(self, image):
         image = mpimg.imread(image)
         if np.random.rand() < 0.5:
-          image = self.pan(image, self.translate_percent)
+            image = self.pan(image, self.translate_percent)
         if np.random.rand() < 0.5:
             image = self.zoom(image, self.scale)
         if np.random.rand() < 0.5:
@@ -86,16 +80,27 @@ class BasicAugment():
         
         return image
         
-    def show_sample_image(self, original_image, augmented_image):
+    def show_sample_image(self):
+        if self.show_sample:
+            random_index = random.randint(0, len(self.image_paths)-1)
+            
+            original_image = mpimg.imread(self.image_paths[random_index])
+            augmented_image = self.random_augment(self.image_paths[random_index])
+            
+            self.show_sample_image_plot(original_image, augmented_image)
+
+
+    
+    def show_sample_image_plot(self, original_image, augmented_image):    
         fig, axs = plt.subplots(1, 2, figsize=(15, 10))
         fig.tight_layout()
-        
+            
         axs[0].imshow(original_image)
         axs[0].set_title("Original Image")
-        
+            
         axs[1].imshow(augmented_image)
         axs[1].set_title("Augmented Image")
-        
+            
         plt.show()
     
     @staticmethod
@@ -139,7 +144,7 @@ if __name__ == '__main__':
     augment_generator = BasicAugment(image_paths, labels, False)
 
     size = 10
-    X, Y = augment_generator.generator(size)
+    X, Y = augment_generator.generate(size)
     
     ncol = 2
     nrow = math.ceil(size / ncol)  
